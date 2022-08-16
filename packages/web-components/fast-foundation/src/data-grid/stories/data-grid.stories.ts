@@ -1,7 +1,7 @@
 import { html } from "@microsoft/fast-element";
 import type { Meta, Story, StoryArgs } from "../../__test__/helpers.js";
 import { renderComponent } from "../../__test__/helpers.js";
-import { FASTDataGrid, GenerateHeaderOptions } from "../data-grid.js";
+import { FASTDataGrid } from "../data-grid.js";
 
 const storyTemplate = html<StoryArgs<FASTDataGrid>>`
     <fast-data-grid

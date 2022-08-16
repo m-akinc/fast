@@ -155,10 +155,11 @@ export const myTabs = Tabs.compose({
 
 #### CSS Parts
 
-| Name              | Description                       |
-| ----------------- | --------------------------------- |
-| `tablist`         | The element wrapping for the tabs |
-| `activeIndicator` | The visual indicator              |
+| Name               | Description                        |
+| ------------------ | ---------------------------------- |
+| `tablist`          | The element wrapping the tabs      |
+| `tabpanel`         | The element wrapping the tabpanels |
+| `active-indicator` | The visual indicator               |
 
 #### Slots
 
