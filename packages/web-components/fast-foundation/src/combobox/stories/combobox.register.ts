@@ -1,3 +1,4 @@
+import { html } from "@microsoft/fast-element";
 import { css } from "@microsoft/fast-element";
 import { FASTCombobox } from "../combobox.js";
 import { comboboxTemplate } from "../combobox.template.js";
@@ -34,17 +35,10 @@ const styles = css`
         display: inline-flex;
         flex-direction: column;
         left: 0;
-        max-height: calc(
-            var(--max-height) -
-                (
-                    (var(--base-height-multiplier) + var(--density)) * var(--design-unit) *
-                        1px
-                )
-        );
         padding: calc(var(--design-unit) * 1px) 0;
         overflow-y: auto;
-        position: absolute;
-        width: 100%;
+        position: fixed;
+        top: 0;
         z-index: 1;
     }
 
@@ -212,7 +206,7 @@ const styles = css`
 FASTCombobox.define({
     name: "fast-combobox",
     template: comboboxTemplate({
-        indicator: /* html */ `
+        indicator: /* html */ html`
             <svg
                 class="select-indicator"
                 part="select-indicator"

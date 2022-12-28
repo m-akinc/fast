@@ -15,7 +15,7 @@ export function tabsTemplate<T extends FASTTabs>(
             <slot name="tab" ${slotted("tabs")}></slot>
         </div>
         ${endSlotTemplate(options)}
-        <div class="tabpanel">
+        <div class="tabpanel" part="tabpanel">
             <slot name="tabpanel" ${slotted("tabpanels")}></slot>
         </div>
     `;

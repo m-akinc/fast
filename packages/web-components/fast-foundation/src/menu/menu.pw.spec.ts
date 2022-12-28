@@ -234,7 +234,7 @@ test.describe("Menu", () => {
         for (let i = 0; i < menuItemsCount; i++) {
             const item = menuItems.nth(i);
 
-            await expect(item).toHaveAttribute("aria-checked", "");
+            await expect(item).toHaveAttribute("aria-checked", "false");
 
             await item.click();
 
@@ -299,15 +299,15 @@ test.describe("Menu", () => {
 
         await expect(menuItems.nth(0)).toHaveAttribute("aria-checked", "true");
         await expect(menuItems.nth(1)).toHaveAttribute("aria-checked", "false");
-        await expect(menuItems.nth(2)).toHaveAttribute("aria-checked", "");
-        await expect(menuItems.nth(3)).toHaveAttribute("aria-checked", "");
+        await expect(menuItems.nth(2)).toHaveAttribute("aria-checked", "false");
+        await expect(menuItems.nth(3)).toHaveAttribute("aria-checked", "false");
 
         await menuItems.nth(1).click();
 
         await expect(menuItems.nth(0)).toHaveAttribute("aria-checked", "false");
         await expect(menuItems.nth(1)).toHaveAttribute("aria-checked", "true");
-        await expect(menuItems.nth(2)).toHaveAttribute("aria-checked", "");
-        await expect(menuItems.nth(3)).toHaveAttribute("aria-checked", "");
+        await expect(menuItems.nth(2)).toHaveAttribute("aria-checked", "false");
+        await expect(menuItems.nth(3)).toHaveAttribute("aria-checked", "false");
 
         await menuItems.nth(2).click();
 
@@ -360,6 +360,7 @@ test.describe("Menu", () => {
     });
 
     test("should close the menu when pressing the escape key", async () => {
+        test.slow();
         await root.evaluate(node => {
             node.innerHTML = /* html */ `
                 <fast-menu>
@@ -386,6 +387,7 @@ test.describe("Menu", () => {
 
         await element.first().press("Escape");
 
+        await (await element.first().elementHandle())?.waitForElementState("stable");
 
         await expect(menuItems.first()).toBeFocused();
     });

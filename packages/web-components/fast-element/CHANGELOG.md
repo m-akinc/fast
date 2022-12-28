@@ -1,8 +1,41 @@
 # Change Log - @microsoft/fast-element
 
-This log was last generated on Tue, 25 Oct 2022 20:24:32 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Dec 2022 01:18:22 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 2.0.0-beta.19
+
+Fri, 02 Dec 2022 01:18:22 GMT
+
+### Changes
+
+- feat: add kernel mode with isolation by default (roeisenb@microsoft.com)
+
+## 2.0.0-beta.18
+
+Tue, 15 Nov 2022 02:40:34 GMT
+
+### Changes
+
+- chore: move ViewBehaviorOrchestrator to utilities (roeisenb@microsoft.com)
+- feat: add new DOM Policy protection throughout (roeisenb@microsoft.com)
+
+## 2.0.0-beta.17
+
+Tue, 01 Nov 2022 23:26:26 GMT
+
+### Changes
+
+- fix: prevent circular reference errors when stringifying DOM nodes controlled by FAST's rendering engine (roeisenb@microsoft.com)
+
+## 2.0.0-beta.16
+
+Fri, 28 Oct 2022 20:44:44 GMT
+
+### Changes
+
+- Fixed bug preventing main component stylesheet behaviors from being connected during connectedCallback (nicholasrice@users.noreply.github.com)
 
 ## 2.0.0-beta.15
 

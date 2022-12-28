@@ -1,6 +1,6 @@
 {
   "type": "prerelease",
-  "comment": "remove indent logic from foundation menu and menu item, move to example",
+  "comment": "add missing part attribute for tabpanel in tabs",
   "packageName": "@microsoft/fast-foundation",
   "email": "chhol@microsoft.com",
   "dependentChangeType": "prerelease"

@@ -1,10 +1,16 @@
-import { SyntheticViewTemplate, Updates } from "@microsoft/fast-element";
-import { attr, Observable, observable } from "@microsoft/fast-element";
+import { autoUpdate, computePosition, flip, hide, size } from "@floating-ui/dom";
+import {
+    attr,
+    DangerousHTMLDirective,
+    Observable,
+    observable,
+    SyntheticViewTemplate,
+    Updates,
+} from "@microsoft/fast-element";
 import { limit, uniqueId } from "@microsoft/fast-web-utilities";
 import type { FASTListboxOption } from "../listbox-option/listbox-option.js";
 import { DelegatesARIAListbox } from "../listbox/listbox.js";
 import { StartEnd, StartEndOptions } from "../patterns/index.js";
-import { SelectPosition } from "../select/select.options.js";
 import { applyMixins } from "../utilities/apply-mixins.js";
 import { FormAssociatedCombobox } from "./combobox.form-associated.js";
 import { ComboboxAutocomplete } from "./combobox.options.js";
@@ -14,7 +20,7 @@ import { ComboboxAutocomplete } from "./combobox.options.js";
  * @public
  */
 export type ComboboxOptions = StartEndOptions & {
-    indicator?: string | SyntheticViewTemplate;
+    indicator?: DangerousHTMLDirective | SyntheticViewTemplate;
 };
 
 /**
@@ -81,13 +87,6 @@ export class FASTCombobox extends FormAssociatedCombobox {
     private filter: string = "";
 
     /**
-     * The initial state of the position attribute.
-     *
-     * @internal
-     */
-    private forcedPosition: boolean = false;
-
-    /**
      * Reset the element to its first selectable option when its parent form is reset.
      *
      * @internal
@@ -131,14 +130,6 @@ export class FASTCombobox extends FormAssociatedCombobox {
     public listboxId: string = uniqueId("listbox-");
 
     /**
-     * The max height for the listbox when opened.
-     *
-     * @internal
-     */
-    @observable
-    public maxHeight: number = 0;
-
-    /**
      * The open attribute.
      *
      * @public
@@ -161,7 +152,7 @@ export class FASTCombobox extends FormAssociatedCombobox {
             this.ariaControls = this.listboxId;
             this.ariaExpanded = "true";
 
-            this.setPositioning();
+            Updates.enqueue(() => this.setPositioning());
             this.focusAndScrollOptionIntoView();
 
             // focus is directed to the element when `open` is changed programmatically
@@ -212,29 +203,6 @@ export class FASTCombobox extends FormAssociatedCombobox {
     }
 
     /**
-     * The placement for the listbox when the combobox is open.
-     *
-     * @public
-     */
-    @attr({ attribute: "position" })
-    public positionAttribute?: SelectPosition;
-
-    /**
-     * The current state of the calculated position of the listbox.
-     *
-     * @public
-     */
-    @observable
-    public position?: SelectPosition;
-    protected positionChanged(
-        prev: SelectPosition | undefined,
-        next: SelectPosition | undefined
-    ): void {
-        this.positionAttribute = next;
-        this.setPositioning();
-    }
-
-    /**
      * The value property.
      *
      * @public
@@ -269,6 +237,13 @@ export class FASTCombobox extends FormAssociatedCombobox {
             Observable.notify(this, "value");
         }
     }
+
+    /**
+     * Cleanup function for the listbox positioner.
+     *
+     * @public
+     */
+    public cleanup: () => void;
 
     /**
      * Handle opening and closing the listbox when the combobox is clicked.
@@ -307,7 +282,6 @@ export class FASTCombobox extends FormAssociatedCombobox {
 
     public connectedCallback() {
         super.connectedCallback();
-        this.forcedPosition = !!this.positionAttribute;
         if (this.value) {
             this.initialValue = this.value;
         }
@@ -326,6 +300,11 @@ export class FASTCombobox extends FormAssociatedCombobox {
             super.disabledChanged(prev, next);
         }
         this.ariaDisabled = this.disabled ? "true" : "false";
+    }
+
+    public disconnectedCallback(): void {
+        this.cleanup?.();
+        super.disconnectedCallback();
     }
 
     /**
@@ -608,26 +587,46 @@ export class FASTCombobox extends FormAssociatedCombobox {
     /**
      * Calculate and apply listbox positioning based on available viewport space.
      *
-     * @param force - direction to force the listbox to display
      * @public
      */
     public setPositioning(): void {
-        const currentBox = this.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const availableBottom = viewportHeight - currentBox.bottom;
+        if (this.$fastController.isConnected) {
+            this.cleanup = autoUpdate(this, this.listbox, async () => {
+                const { middlewareData, x, y } = await computePosition(
+                    this,
+                    this.listbox,
+                    {
+                        placement: "bottom",
+                        strategy: "fixed",
+                        middleware: [
+                            flip(),
+                            size({
+                                apply: ({ availableHeight, rects }) => {
+                                    Object.assign(this.listbox.style, {
+                                        maxHeight: `${availableHeight}px`,
+                                        width: `${rects.reference.width}px`,
+                                    });
+                                },
+                            }),
+                            hide(),
+                        ],
+                    }
+                );
 
-        this.position = this.forcedPosition
-            ? this.positionAttribute
-            : currentBox.top > availableBottom
-            ? SelectPosition.above
-            : SelectPosition.below;
+                if (middlewareData.hide?.referenceHidden) {
+                    this.open = false;
+                    this.cleanup();
+                    return;
+                }
 
-        this.positionAttribute = this.forcedPosition
-            ? this.positionAttribute
-            : this.position;
-
-        this.maxHeight =
-            this.position === SelectPosition.above ? ~~currentBox.top : ~~availableBottom;
+                Object.assign(this.listbox.style, {
+                    position: "fixed",
+                    top: "0",
+                    left: "0",
+                    transform: `translate(${x}px, ${y}px)`,
+                });
+            });
+        }
     }
 
     /**
