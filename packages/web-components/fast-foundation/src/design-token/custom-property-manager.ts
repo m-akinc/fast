@@ -32,14 +32,19 @@ abstract class QueuedStyleSheetTarget implements PropertyTarget {
 /**
  * Handles setting properties for a FASTElement using Constructable Stylesheets
  */
-class ConstructableStyleSheetTarget extends QueuedStyleSheetTarget {
+class ConstructableStyleSheetTarget implements PropertyTarget {
     protected target: PropertyTarget;
     constructor(source: HTMLElement & FASTElement) {
-        super();
-
         const sheet = new CSSStyleSheet();
         this.target = (sheet.cssRules[sheet.insertRule(":host{}")] as CSSStyleRule).style;
         source.$fastController.addStyles(ElementStyles.create([sheet]));
+    }
+
+    public setProperty(name: string, value: string) {
+        this.target.setProperty(name, value);
+    }
+    public removeProperty(name: string) {
+        this.target.removeProperty(name);
     }
 }
 
